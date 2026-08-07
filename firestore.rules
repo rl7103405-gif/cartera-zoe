@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── PROYECTO COMPARTIDO ──────────────────────────────────────────────
+    // Un solo proyecto de Firebase con DOS personas. Cada quien solo puede
+    // leer y escribir en su propio espacio de datos; nadie ve el del otro
+    // desde la app. IMPORTANTE: estas reglas son del proyecto COMPLETO, asi
+    // que hay que publicarlas TAL CUAL (no las de una sola persona), o el
+    // otro usuario se queda sin acceso a sus datos.
+    //
+    // Si agregas a alguien mas: copia un bloque, cambia el correo y usa un
+    // prefijo nuevo (que debe coincidir con NS y PFX en SU index.html).
+
+    function esRoberto() {
+      return request.auth != null && request.auth.token.email == 'rl7103405@gmail.com';
+    }
+    function esZoe() {
+      return request.auth != null && request.auth.token.email == 'zoe.frei@outlook.de';
+    }
+
+    // espacio de Roberto  (index.html: NS='cartera', PFX='')
+    match /cartera/{documento=**}        { allow read, write: if esRoberto(); }
+    match /gastos/{documento=**}         { allow read, write: if esRoberto(); }
+    match /ingresos/{documento=**}       { allow read, write: if esRoberto(); }
+    match /transferencias/{documento=**} { allow read, write: if esRoberto(); }
+    match /stocksOps/{documento=**}      { allow read, write: if esRoberto(); }
+
+    // espacio de Zoe  (index.html: NS='zoe', PFX='zoe_')
+    match /zoe/{documento=**}                { allow read, write: if esZoe(); }
+    match /zoe_gastos/{documento=**}         { allow read, write: if esZoe(); }
+    match /zoe_ingresos/{documento=**}       { allow read, write: if esZoe(); }
+    match /zoe_transferencias/{documento=**} { allow read, write: if esZoe(); }
+    match /zoe_stocksOps/{documento=**}      { allow read, write: if esZoe(); }
+
+    // todo lo demas queda cerrado
+    match /{documento=**} { allow read, write: if false; }
+  }
+}
