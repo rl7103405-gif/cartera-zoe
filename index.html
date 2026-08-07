@@ -923,17 +923,20 @@ const firebaseConfig = {
   messagingSenderId: "31404911125",
   appId: "1:31404911125:web:7d01272350b6a2271bbc1c"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-const ALLOWED_EMAIL = 'zoe.frei@outlook.de'; // el correo con el que entras a esta copia
 // ESPACIO DE DATOS: permite que varias personas compartan un mismo proyecto de Firebase
 // sin verse los datos. Cada copia usa su propio prefijo y las reglas de Firestore lo
 // amarran al correo de su dueno. Si tienes tu propio proyecto, deja 'cartera' y ''.
 const NS = 'zoe';   // coleccion raiz de los documentos (saldos, perfil, tarjeta, ...)
 const PFX = 'zoe_';         // prefijo de las colecciones (gastos, ingresos, transferencias, stocksOps)
 const C_GASTOS=PFX+'gastos', C_INGRESOS=PFX+'ingresos', C_TRANSF=PFX+'transferencias', C_OPS=PFX+'stocksOps';
+// La instancia lleva el nombre del espacio: Firebase Auth guarda la sesion por
+// (proyecto + nombre de instancia), asi que dos copias en el MISMO dominio ya no
+// comparten sesion ni se expulsan entre si.
+const app = initializeApp(firebaseConfig, NS);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const ALLOWED_EMAIL = 'zoe.frei@outlook.de'; // el correo con el que entras a esta copia
 const TITULOS = 45;
 // metas del usuario para el cierre de ano y cuota mensual de un plan de suscripcion
 const META_SAVINGS = 0, META_STOCKS = 0, META_FECHA = '2026-12-31', PREMIUM_MONTO = 0; // define tus metas aqui
@@ -1032,7 +1035,12 @@ onAuthStateChanged(auth, async user => {
   } else {
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('loading-overlay').classList.add('hidden');
-    if (user) signOut(auth);
+    // NO se cierra la sesion automaticamente: si fuera de otra persona (otra copia
+    // de la app), la sacariamos a ella. Basta con avisar y dejar que inicie sesion.
+    if (user) {
+      const errEl = document.getElementById('login-error');
+      if (errEl) errEl.textContent = 'esta copia es de ' + ALLOWED_EMAIL;
+    }
   }
 });
 
