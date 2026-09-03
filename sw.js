@@ -1,4 +1,4 @@
-const CACHE = 'mc-zoe-v3';
+const CACHE = 'mc-zoe-v4';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
