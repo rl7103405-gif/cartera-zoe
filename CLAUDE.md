@@ -62,6 +62,13 @@ Ver `README.md` para el paso a paso.
 - **Cuentas**: hoy están fijas en el código (`CUENTAS`, campos del `state`). Volverlas
   configurables por usuario es el siguiente paso planeado de esta plantilla.
 
+## Sin señal (16/10/2026, traído de mi-cartera; revisado por code-reviewer, Codex y qa-tester)
+
+- Igual que en `mi-cartera` (su CLAUDE.md, sección "Sin señal"): la carga desde caché nunca se marca confirmada (banda arriba, punto rojo, reintento solo); **gasto e ingreso** sin señal van a una bandeja propia del teléfono (`cartera-bandeja-cartera-zoe`, sale de la carpeta del sitio) y suben por `txDinero` con `requerirAusentes`; lo demás pide señal y avisa al instante.
+- **Regla que no se rompe:** `altaGasto`/`altaIngreso` llevan `requerirAusentes:[ref]` desde el primer intento (sin eso, una respuesta perdida cobraba dos veces).
+- La lista de `desdeCache` en `loadFromFirebase` nombra EXACTAMENTE las lecturas de esta copia (aquí no hay `fDoc` ni `mtDoc`): una variable que no existe tumba la carga.
+- Pruebas con emuladores (nunca producción): `Desktop\CARTERA\pruebas-sin-senal\` (`adaptar-pruebas.mjs` las adapta a cada copia; para Zoe la carpeta del sitio es `cartera-zoe`).
+
 ## Reglas de trabajo
 
 1. **Un solo commit por tanda de cambios** — GitHub Pages atasca su cola de deploys si se
@@ -71,3 +78,7 @@ Ver `README.md` para el paso a paso.
 4. Validar siempre lo que viene de Firestore (`Number.isFinite`, arrays, regex) — un dato
    corrupto no debe romper la app ni propagar `NaN` a los saldos.
 5. Escapar con `escapeHtml()` cualquier texto del usuario que se interpole en HTML.
+
+## Deudas con tarjeta (16/10/2026)
+
+Igual que en `mi-cartera` (su CLAUDE.md, sección "Deudas con tarjeta"): las tarjetas de crédito de esta copia sirven para "me deben"/"le pagué" (suben su deuda) y se apagan cuando el dinero entra; `txDinero` trata un movimiento con id ya aplicado como `ya-existe` (éxito, sin cobrar dos veces) y `yaAplicado()` repinta Deudas. Pruebas: `deudas-tarjeta.mjs` y `deudas-doble.mjs` en `Desktop\CARTERA\pruebas-sin-senal\`.
