@@ -1587,6 +1587,8 @@ function estandarDe(p) {
   return {...base,ver:ESTANDAR_VER};
 }
 const CUENTAS = {efectivo:'efectivo', nu:'NU saldo', cajita1:'NU cajita 1', cajita2:'NU cajita 2', gbm:'GBM efectivo', revolut:'BBVA', revSavings:'BBVA ahorro', tarjeta:'tarjeta NU', tarjetaRev:'tarjeta BBVA', revTdcDep:'deposito de garantia', stocks:'Stocks (bolsa)'};
+// (31-oct-2026) la tarjeta BBVA de esta copia es la garantizada de Revolut renombrada; Zoe no la tiene
+const TDC_BBVA_EN_USO = false; // antes de prenderla: revisar zoe/tarjetaRev, un deposito viejo (p. ej. 250) volveria al patrimonio
 const CTAS_STOCK_OP=['efectivo','nu','revolut']; // cuentas desde las que se puede comprar/vender bolsa
 const FUENTES_GASTO=['efectivo','nu','tarjeta','revolut','tarjetaRev'];
 const DESTINOS_INGRESO=['efectivo','nu','revolut']; // gbm retirado (los ingresos legados con gbm solo se muestran/deshacen)
@@ -1932,7 +1934,7 @@ let state = {
   revMXN:0, revSavingsBase:0, revSavingsFecha:'', revSavingsTasa:0, revNvdaShares:0,
   tarjetaDeuda:0, tarjetaMovimientos:[],
   // tarjeta BBVA garantizada: limite de credito = deposito de garantia 1:1 (rango $250-$75,000)
-  revTdcDeuda:0, revTdcDeposito:250, revTdcMovs:[],
+  revTdcDeuda:0, revTdcDeposito:0, revTdcMovs:[],  // 0: sin tarjeta garantizada no hay deposito (antes 250 = $250 fantasma)
   ivvPrecio:0, ivvVar:null, ivvHistory:[],
   nvdaPrecio:null, nvdaPrev:null, nvdaFecha:'', usdMxn:null, usdMxnPrev:null, usdMxnFecha:'',
   nvdaHistory:[], usdMxnHistory:[],
@@ -4545,7 +4547,9 @@ function render() {
   }
 
   // tarjeta BBVA: limite = deposito 1:1; deudaUsada defensiva (un borrado puede dejar saldo a favor)
-  const tdcDep=Number.isFinite(state.revTdcDeposito)?state.revTdcDeposito:0;
+  // (31-oct-2026) Zoe no tiene esa tarjeta (esta escondida en el CSS de "cuentas que Zoe no usa"):
+  // su deposito no cuenta aunque el servidor guarde uno. Si la abre, TDC_BBVA_EN_USO=true y borrar sus lineas del CSS.
+  const tdcDep=TDC_BBVA_EN_USO&&Number.isFinite(state.revTdcDeposito)?state.revTdcDeposito:0;
   const tdcDeudaUsada=Math.max(0,state.revTdcDeuda||0);
   const tdcDisponible=Math.max(0,Math.min(tdcDep,tdcDep-tdcDeudaUsada));
   const tdcRetirable=Math.max(0,Math.min(tdcDep-250,tdcDep-tdcDeudaUsada));
@@ -7221,7 +7225,7 @@ function renderDistribucion(ahorro, inversiones, disponible, garantia, nvdaPendi
     {nombre:'Inversiones',sub:'acciones'+(nvdaPendiente?' · precio pendiente':''),monto:g2,color:'var(--d2)',txt:'var(--d2t)'},
     {nombre:'Disponible',sub:'efectivo + NU + BBVA',monto:g3,color:'var(--d3)',txt:'var(--d3t)'},
     {nombre:'Garantía congelada',sub:'depósito tarjeta BBVA',monto:g4,color:'var(--d4)',txt:'var(--d4t)'}
-  ];
+  ].filter(g=>g.monto>0); // solo grupos con dinero: el donut ya omitia los de $0 y la lista no cuadraba
   const R=62,SW=16,rm=R-SW/2,C=2*Math.PI*rm;
   let off=0,circ='';
   grupos.forEach(g=>{
