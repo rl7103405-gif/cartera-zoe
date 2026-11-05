@@ -1,4 +1,4 @@
-const CACHE = 'mc-zoe-v6'; // arranque instantaneo (stale-while-revalidate + SDK precacheado)
+const CACHE = 'mc-zoe-v7'; // arranque instantaneo (stale-while-revalidate + SDK precacheado)
 // El HTML y el SDK de Firebase se precachean: sin esto, en el telefono cada apertura
 // esperaba a bajar ~94KB de HTML MAS los 3 modulos de gstatic antes de pintar nada.
 const SDK = [
