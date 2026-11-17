@@ -23,12 +23,8 @@ En <https://console.firebase.google.com> → proyecto `mi-cartera-b43e0` →
 **Authentication → Users → Agregar usuario**: correo `zoe.frei@outlook.de` y una contraseña.
 Mejor que **ella** la teclee, o que la cambie en cuanto entre.
 
-### 2. Publicar las reglas de seguridad (IMPORTANTE)
-En **Firestore Database → Reglas**, borra lo que haya y pega **completo** el contenido de
-`firestore.rules` de esta carpeta. Ese archivo cubre a **los dos**: si publicas solo las
-reglas de una persona, la otra pierde acceso a sus datos.
-
-Da **Publicar** y verifica después que tu propia app siga cargando bien.
+### 2. Reglas de seguridad (IMPORTANTE)
+No se publican desde aquí: esta copia usa el proyecto compartido `mi-cartera-b43e0`, y sus reglas viven en `Desktop\CARTERA\cartera-casa\firestore.rules` (fuera de este repo; piden el uid y el correo de cada cuenta). Se despliegan SOLO desde ahí. Nunca publiques reglas desde esta carpeta: le quitarías el acceso a las demás carteras (17-nov-2026).
 
 ### 3. Subir esta copia a internet
 Repositorio nuevo (ej. `cartera-zoe`) con estos 5 archivos: `index.html`, `manifest.json`,
